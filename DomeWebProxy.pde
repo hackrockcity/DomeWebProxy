@@ -1,5 +1,6 @@
 import java.net.URI;
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.Iterator;
 import org.java_websocket.WebSocketImpl;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.drafts.Draft;
@@ -14,18 +15,21 @@ int HEIGHT = 160;
 int ZOOM = 2;
 String HOST = "127.0.0.1";
 int PORT =  58082;
+int ORBTICKS = 30;
 String WSURL = "ws://www.domestar.us:8000/dome";
 
-HashMap<String,Orb> orbs;
+ArrayList<Orb> orbs;
 WebSocketClient cc;
 LEDDisplay display;
 PGraphics g;
 
 void setup() {
   size(WIDTH*ZOOM,HEIGHT*ZOOM);
+  frameRate(30);
+  
   g = createGraphics(WIDTH,HEIGHT);
   display = new LEDDisplay(this,WIDTH,HEIGHT,true,HOST,PORT);
-  orbs = new HashMap<String,Orb>(); 
+  orbs = new ArrayList<Orb>(); 
   
   try {
     println("Connecting...");
@@ -34,28 +38,23 @@ void setup() {
       public void onMessage(String message) {
         //println(message);
         JSONObject jso = JSONObject.parse(message);
-        JSONObject data = jso.getJSONObject("data");
-        JSONObject o = data.getJSONObject("o");
-        int a = o.getInt("a");
-        int b = o.getInt("b");
-        int g = o.getInt("g");
-        String touch = data.getString("touch");
+        int a = jso.getInt("a");
+        int b = jso.getInt("b");
+        int g = jso.getInt("g");
+        String touch = jso.getString("t");
         String id = jso.getString("id");
+        int c = jso.getInt("c");
         
-        if (touch.equals("start")) {
-          orbs.put(id,new Orb(a,b,g));
-        }
-        else if (touch.equals("down")) {
-          orbs.get(id).setPosition(a,b,g);
-        }
-        
+        synchronized(orbs) {
+          orbs.add(new Orb(a,b,g,c));
+        }        
       }
     
       @Override
       public void onError(Exception e) { println(e); }
     
       @Override
-      public void onClose(int n,String s,boolean b) { println("Close"+n+s+b); }
+      public void onClose(int n,String s,boolean b) { println("Connection closed. Reconnecting."); cc.connect(); }
     
       @Override
       public void onOpen(ServerHandshake sh) { println("Connect"); }
@@ -70,8 +69,12 @@ void draw() {
   g.beginDraw();
   g.background(0);
   
-  for (Orb o : orbs.values()) {
-    o.draw(g);
+  synchronized(orbs) {
+    for (Iterator<Orb> itr = orbs.iterator(); itr.hasNext();) {
+      Orb o = itr.next();
+      o.draw(g);
+      if (!o.enabled) itr.remove();
+    }
   }
     
   g.endDraw();

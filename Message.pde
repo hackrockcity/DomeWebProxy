@@ -7,15 +7,17 @@ class Message {
   int hue;
   int x;
   int y;
+  String mode;
   
   public Message(String JSON) {
     JSONObject jso = JSONObject.parse(JSON);
     this.alpha = jso.getInt("a");
     this.beta = jso.getInt("b");
     this.gamma = jso.getInt("g");
-    this.touch = jso.getString("t");
+    //this.touch = jso.getString("t");
     this.id = jso.getString("id");
     this.hue = jso.getInt("c");
+    this.mode = jso.getString("m");
     this.calculatePosition();
   }
   

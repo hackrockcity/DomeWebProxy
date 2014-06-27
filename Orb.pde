@@ -2,18 +2,19 @@ class Orb {
   int x;
   int y;
   boolean enabled;
+  int tick;
   int ticks;
   int hue;
+  int size;
   
   public Orb(Message m) {
     this.x = m.x;
     this.y = m.y;
     this.hue = m.hue;
-    this.ticks = ORBTICKS;
+    this.size = m.size;
+    this.ticks = (11 - this.size) * 10;
+    this.tick = this.ticks; 
     this.enabled = true;
-  }
-  
-  void setPosition(int a, int b, int g) {
   }
   
   void draw(PGraphics g) {
@@ -22,12 +23,12 @@ class Orb {
       g.blendMode(ADD);
       g.colorMode(HSB, 360);
       g.noStroke();
-      g.fill(hue, 360, 270-ticks*(270/ORBTICKS));
-      g.ellipse(x,y,3,12);
+      g.fill(hue, 360, 270-tick*(270/ticks));
+      g.ellipse(x,y,this.size,this.size*3);
       g.popStyle();    
     
-      ticks--;
-      if (ticks == 0) enabled = false;
+      tick--;
+      if (tick == 0) enabled = false;
     }
   }
   

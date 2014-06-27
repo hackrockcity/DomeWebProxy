@@ -5,9 +5,12 @@ class ProxyClient {
   
   public ProxyClient(String url) {
       this.url = url;
-      
-      try {
-        this.cc = new WebSocketClient(new URI(url)) {
+      this.connect();
+  }
+  
+  public void connect() {
+    try {
+        this.cc = new WebSocketClient(new URI(this.url)) {
       
         @Override
         public void onMessage(String message) {
@@ -18,7 +21,7 @@ class ProxyClient {
         public void onError(Exception e) { println(e); }
     
         @Override
-        public void onClose(int n,String s,boolean b) { println("Proxy connection closed. Reconnecting."); cc.connect(); }
+        public void onClose(int n,String s,boolean b) { println("Proxy connection closed. Reconnecting."); ProxyClient.this.connect(); }
     
         @Override
         public void onOpen(ServerHandshake sh) { println("Connected to proxy server."); }    

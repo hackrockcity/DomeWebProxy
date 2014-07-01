@@ -10,11 +10,13 @@ class Message {
   int y;
   int size;
   boolean calibrated;
+  boolean fire;
+  boolean pulse;
+  boolean paint;
 
   // TODO FIXME Rethink calibration vs. non-calibration...  
   public Message(String JSON) {
     JSONObject jso = JSONObject.parse(JSON);
-    println(JSON);
     this.alpha = jso.getInt("a");
     this.beta = jso.getInt("b");
     this.gamma = jso.getInt("g");
@@ -24,7 +26,7 @@ class Message {
     
     // This is kind of gross feeling.
     if (jso.hasKey("A") && jso.hasKey("B")) {
-      this.calibrated = true;
+      this.calibrated = false;
       this.cAlpha = jso.getInt("A");
       this.cBeta = jso.getInt("B");
     }
@@ -34,9 +36,11 @@ class Message {
       this.cBeta = -65535;
     }
     
-    this.calculatePosition();
+    this.fire = jso.hasKey("f") && jso.getInt("f") == 1;
+    this.pulse = jso.hasKey("p") && jso.getInt("p") == 1;
+    this.paint = jso.hasKey("P") && jso.getInt("P") == 1;
     
-    println(this.x + "," + this.y);
+    this.calculatePosition();    
   }
   
   public void calculatePosition() {

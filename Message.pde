@@ -44,7 +44,7 @@ class Message {
   }
   
   public void calculatePosition() {
-    int xang = this.calibrated ? this.cAlpha : (this.alpha + this.gamma) % 360;
+    int xang = this.calibrated ? this.cAlpha : this.alpha;
     if (xang < 0) xang += 360;
         
     this.x = int((360-xang)/360.0*WIDTH+WIDTH/2);
